@@ -6,7 +6,7 @@ export default function Recorder() {
   const [isRecording, setIsRecording] = useState(false);
   const [audioURL, setAudioURL] = useState("");
   const mediaRecorderRef = useRef<MediaRecorder>(null);
-  const audioChunksRef = useRef([]);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   const startRecording = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });

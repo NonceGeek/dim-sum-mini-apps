@@ -1,6 +1,6 @@
 ﻿"use client";
 // components/SpeechEvaluation.tsx
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 
 // TypeScript declaration for SpeechRecognition
 declare global {
