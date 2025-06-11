@@ -33,5 +33,5 @@ To deploy all apps and packages, config the root folder in vercel. and then run 
 ```
 apps/<your miniapp>
 pnpm i
-pnpm run bild
+pnpm run build
 ```
