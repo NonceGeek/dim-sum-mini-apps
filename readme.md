@@ -1,3 +1,6 @@
+# Dim-sum-miniapps links
+https://dim-sum-miniapps-shadowing-game.vercel.app/
+
 # Dim-sum-miniapps Turborepo starter
 
 This Dim-sum-miniapps is built and managed by turborpo(monorepo).
