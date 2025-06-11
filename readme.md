@@ -1,6 +1,6 @@
-# dim-sum-miniapps Turborepo starter
+# Dim-sum-miniapps Turborepo starter
 
-This Dim-sum-miniapps Turborepo starter is maintained by the Turborepo core team.
+This Dim-sum-miniapps is built and managed by turborpo(monorepo).
 
 
 ## What's inside?
