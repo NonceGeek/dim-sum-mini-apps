@@ -5,7 +5,6 @@ import { useRef, useState } from "react";
 import {
   Dialog,
   DialogTitle,
-  DialogClose,
   DialogContent,
   DialogFooter,
   DialogTrigger,
