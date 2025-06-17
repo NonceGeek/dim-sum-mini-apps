@@ -1,6 +1,6 @@
 import { RefObject } from "react";
 
-export interface DictionaryNote {
+interface DictionaryContext {
   page?: number;
   number?: string;
   others?: {
@@ -9,6 +9,9 @@ export interface DictionaryNote {
   };
   pinyin?: string[];
   meaning?: string[];
+}
+export interface DictionaryNote {
+  context: DictionaryContext;
   contributor?: string;
 }
 
