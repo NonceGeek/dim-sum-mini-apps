@@ -58,7 +58,7 @@ export default function Main() {
   return (
     <div className="container mx-auto p-6">
       <center>
-        <h1 className="text-4xl font-bold mb-8">粤语单词卡片生成器</h1>
+        <h1 className="text-4xl font-bold mb-8">粤语知识分享</h1>
       </center>
 
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
