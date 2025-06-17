@@ -5,7 +5,7 @@ module.exports = {
     "../../node_modules/@shadcn/ui/**/*.{js,ts,jsx,tsx}",
   ],
   safelist: [
-    "font-[LiSu]",
+    "font-[NotoSansLisu]",
     "font-[SimHei]",
     "font-[CactusClassicalSerif]",
     "font-[NotoSansTC]",

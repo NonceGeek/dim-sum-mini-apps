@@ -11,6 +11,16 @@
   src: url("/fonts/NotoSansTC.ttf");
   font-display: swap;
 }
+@font-face {
+  font-family: "NotoSansLisu";
+  src: url("/fonts/NotoSansLisu.ttf");
+  font-display: swap;
+}
+@font-face {
+  font-family: "SimHei";
+  src: url("/fonts/simhei.ttf");
+  font-display: swap;
+}
 
 @custom-variant dark (&:is(.dark *));
 
