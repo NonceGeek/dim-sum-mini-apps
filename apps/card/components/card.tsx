@@ -69,7 +69,7 @@ const fontFamilyOptions = [
   },
   {
     name: "隶书",
-    value: "LiSu",
+    value: "NotoSansLisu",
   },
   {
     name: "CactusClassicalSerif",
