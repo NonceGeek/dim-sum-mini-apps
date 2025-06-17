@@ -60,7 +60,7 @@ export default function Post({
         </Button>
       </DialogTrigger>
       <DialogTitle />
-      <DialogContent className="rounded-none [&>button]:hidden">
+      <DialogContent className="rounded-none [&>button]:hidden max-h-[98vh] overflow-y-auto">
         <CardContent
           cardRef={cardRef}
           isQrcode={true}
