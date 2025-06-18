@@ -22,7 +22,7 @@ export default function Footer({ params }: any) {
         "justify-center": 1,
         "items-center": 1,
         "w-full": 1,
-        "py-6": 1,
+        "py-3": 1,
       })}
     >
       <div

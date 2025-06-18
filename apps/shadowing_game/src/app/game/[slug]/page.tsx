@@ -84,16 +84,20 @@ export default function FolllowPageDetail({ params }: any) {
                 }}
               ></div>
               <div
-                className="audio-icon absolute bottom-3 right-3 text-2xl"
+                className="audio-icon text-2xl z-1000 h-[24px]"
                 onClick={() => {
                   playAudio();
                 }}
               >
-                <IoVolumeMediumSharp />
+                <IoVolumeMediumSharp className="float-right" />
               </div>
             </div>
 
-            <audio ref={audioRef} muted={false}>
+            <audio
+              ref={audioRef}
+              muted={false}
+              key={questions[quesNumber]?.audioUrl}
+            >
               <source
                 src={questions[quesNumber]?.audioUrl}
                 type="audio/mpeg"

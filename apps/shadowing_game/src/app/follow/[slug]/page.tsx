@@ -63,19 +63,21 @@ export default function FolllowPageDetail({ params }: any) {
             >
               {questions[quesNumber]?.content}
               <div
-                className="audio-icon absolute bottom-3 right-3 text-2xl"
+                className="audio-icon text-2xl z-1000 h-[24px]"
                 onClick={() => {
                   playAudio();
                 }}
               >
-                <IoVolumeMediumSharp />
+                <IoVolumeMediumSharp className="float-right" />
               </div>
             </div>
 
-            <audio ref={audioRef} muted={false} src={questions[quesNumber]?.audioUrl}>
-              <source
-                type="audio/mpeg"
-              ></source>
+            <audio
+              ref={audioRef}
+              muted={false}
+              src={questions[quesNumber]?.audioUrl}
+            >
+              <source type="audio/mpeg"></source>
             </audio>
           </>
         </div>
@@ -97,8 +99,7 @@ export default function FolllowPageDetail({ params }: any) {
             <div className="flex-1 text-center">
               <button
                 className={classNames("leading-8 border-2 rounded-2xl", {
-                  "px-5 border-green-200 text-green-200":
-                    isAudoSlowSpeed,
+                  "px-5 border-green-200 text-green-200": isAudoSlowSpeed,
                   "text-gray-400 border-transparent": !isAudoSlowSpeed,
                 })}
                 onClick={() => {
