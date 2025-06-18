@@ -144,7 +144,7 @@ const WaveRecorder = ({ onRecordingComplete }: WaveRecorderProps) => {
       };
 
       mediaRecorderRef.current.onstop = () => {
-        const audioBlob: any = new Blob(audioChunks, { type: "audio/webm" });
+        const audioBlob: any = new Blob(audioChunks, { type: "audio/mp4" });
         const audioUrl = URL.createObjectURL(audioBlob);
         setAudioUrl(audioUrl);
         setAudioBlob(audioBlob);
