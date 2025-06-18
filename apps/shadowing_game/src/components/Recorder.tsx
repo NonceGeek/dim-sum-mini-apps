@@ -37,7 +37,7 @@ export default function Recorder() {
       <button onClick={isRecording ? stopRecording : startRecording}>
         {isRecording ? "停止录音" : "开始录音"}
       </button>
-      {audioURL && <audio src={audioURL} controls />}
+      {audioURL && <audio src={audioURL} controls muted={false} />}
     </div>
   );
 }
