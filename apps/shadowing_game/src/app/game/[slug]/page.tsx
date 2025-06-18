@@ -96,6 +96,7 @@ export default function FolllowPageDetail({ params }: any) {
             <audio
               ref={audioRef}
               muted={false}
+              src={questions[quesNumber]?.audioUrl}
               key={questions[quesNumber]?.audioUrl}
             >
               <source
