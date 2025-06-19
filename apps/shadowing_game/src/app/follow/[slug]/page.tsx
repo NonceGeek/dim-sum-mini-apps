@@ -113,7 +113,7 @@ export default function FolllowPageDetail({ params }: any) {
         </div>
         <Game getResult={getResult} />
         {hasReult && (
-          <div className="question-setting flex-col flex">
+          <div className="question-setting flex-col flex mb-20">
             <div className="w-full">
               <button
                 className="px-3 py-1 w-full"

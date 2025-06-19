@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "antd": "^5.26.1",
     "classnames": "^2.5.1",
     "dompurify": "^3.2.6",
     "next": "15.3.3",

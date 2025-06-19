@@ -1,6 +1,7 @@
 ﻿"use client";
 import { useState, useRef, useEffect } from "react";
 import { IoVolumeMediumSharp } from "react-icons/io5";
+import { Alert } from "antd";
 import { useRouter } from "next/navigation";
 import classNames from "classnames";
 import DOMPurify from "dompurify";
@@ -8,13 +9,16 @@ import category from "@/data/category";
 import Game from "@/components/Game";
 import Footer from "@/components/Footer";
 import { useQuestionStore } from "@/stores/questionStore";
+import CelebrationEffect from "@/components/CelebrationEffect";
 
 export default function FolllowPageDetail({ params }: any) {
   const router = useRouter();
   const [questions, setQuestions]: any = useState([]);
   const [hasReult, setResult]: any = useState(false);
+  const [correctInfo, setCorrectInfo]: any = useState(false);
+
   let [quesNumber, setQuesNumber] = useState(0);
-  const [userSelectedQuizAns, setUserSelectedQuizAns] = useState("");
+  const [userSelectedQuizAns, setUserSelectedQuizAns]: any = useState([]);
 
   const audioRef: any = useRef(null);
   const { setCurrentQuestion } = useQuestionStore();
@@ -61,8 +65,20 @@ export default function FolllowPageDetail({ params }: any) {
     setCurrentQuestion(ques[0] || []);
   }, []);
 
+  useEffect(() => {
+    const answers = questions[quesNumber]?.yueQuizAnswer;
+    if (answers && answers.length !== 0) {
+      if (answers.every((item: any) => userSelectedQuizAns.includes(item))) {
+        setCorrectInfo(true);
+      }
+    }
+  }, [userSelectedQuizAns]);
+
   return (
     <div className="">
+      {correctInfo && (
+        <CelebrationEffect type={"confetti"} message={"答对啦"} />
+      )}
       <button className="ml-5 mt-5" onClick={goBack}>
         {"<返回"}
       </button>
@@ -111,16 +127,27 @@ export default function FolllowPageDetail({ params }: any) {
                   return (
                     <div
                       onClick={() => {
-                        setUserSelectedQuizAns(quiz);
+                        const answers = questions[quesNumber]?.yueQuizAnswer;
+                        const result = answers.find(
+                          (item: any) => item === quiz
+                        );
+                        if (result) {
+                          setUserSelectedQuizAns([
+                            ...userSelectedQuizAns,
+                            result,
+                          ]);
+                        } else {
+                          setCorrectInfo(false);
+                        }
                       }}
                       key={quiz}
                       className={classNames(
                         "text-center border-2 p-3 m-2 text-xl rounded-lg cursor-pointer",
                         {
                           "text-green-200 border-green-200":
-                            questions[quesNumber]?.yueQuizAnswer.includes(
-                              userSelectedQuizAns
-                            ) && userSelectedQuizAns === quiz,
+                            userSelectedQuizAns.includes(quiz),
+                          "text-gray-200 border-gray-200":
+                            !userSelectedQuizAns.includes(quiz),
                         }
                       )}
                     >
@@ -136,7 +163,7 @@ export default function FolllowPageDetail({ params }: any) {
         </div>
         <Game getResult={getResult} />
         {hasReult ? (
-          <div className="question-setting flex-col flex">
+          <div className="question-setting flex-col flex mb-20">
             <div className="w-full">
               <button
                 className="px-3 py-1 w-full"

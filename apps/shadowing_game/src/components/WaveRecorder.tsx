@@ -1,6 +1,7 @@
 ﻿"use client";
 import React, { useState, useEffect, useRef } from "react";
 import WaveSurfer from "wavesurfer.js";
+import { Tooltip } from "antd";
 import { useQuestionStore } from "@/stores/questionStore";
 import { IoPulseSharp } from "react-icons/io5";
 
@@ -52,7 +53,7 @@ const WaveRecorder = ({ onRecordingComplete }: WaveRecorderProps) => {
       recognizer.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
         const score = calculateSimilarity(transcript, yueText);
-        const finalScore = Math.round(score * 100);
+        const finalScore = Math.min(100, Math.max(Math.round(score * 100), 60));
         const feedback = generateFeedback(finalScore);
         onRecordingComplete(finalScore, feedback);
         clearInterval(timerRef.current);
@@ -116,7 +117,8 @@ const WaveRecorder = ({ onRecordingComplete }: WaveRecorderProps) => {
     const set1 = new Set(text1.split(""));
     const set2 = new Set(text2.split(""));
     const intersection = new Set([...set1].filter((x) => set2.has(x)));
-    return intersection.size / Math.max(set1.size, set2.size);
+    const score = (intersection.size / Math.max(set1.size, set2.size)) * 2;
+    return score; // 返回百分比
   };
 
   const generateFeedback = (score: number): string => {
@@ -218,24 +220,32 @@ const WaveRecorder = ({ onRecordingComplete }: WaveRecorderProps) => {
         {/* 录音控制面板 */}
         <div className="flex flex-col">
           <div className="flex space-x-4">
-            <button
-              onClick={recording ? stopRecording : startRecording}
-              className={`px-3 py-2 rounded-full font-bold text-lg  duration-300 ${
-                recording ? "" : ""
-              }`}
+            <Tooltip
+              title="点击录制"
+              color={"lime"}
+              key={"lime"}
+              placement="bottom"
+              defaultOpen={true}
             >
-              {recording ? (
-                <div className="flex items-center">
-                  <div className="border text-green-200 rounded-full p-1 text-xl">
+              <button
+                onClick={recording ? stopRecording : startRecording}
+                className={`px-3 py-2 rounded-full font-bold text-lg  duration-300 ${
+                  recording ? "" : ""
+                }`}
+              >
+                {recording ? (
+                  <div className="flex items-center">
+                    <div className="border text-green-200 rounded-full p-1 text-xl">
+                      <IoPulseSharp />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="border text-grey-200 rounded-full p-1 text-xl">
                     <IoPulseSharp />
                   </div>
-                </div>
-              ) : (
-                <div className="border text-grey-200 rounded-full p-1 text-xl">
-                  <IoPulseSharp />
-                </div>
-              )}
-            </button>
+                )}
+              </button>
+            </Tooltip>
           </div>
         </div>
 
