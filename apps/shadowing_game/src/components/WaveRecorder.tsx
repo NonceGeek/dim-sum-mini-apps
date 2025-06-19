@@ -62,6 +62,7 @@ const WaveRecorder = ({ onRecordingComplete }: WaveRecorderProps) => {
 
       recognizer.onerror = (event: any) => {
         console.error("Recognition error:", event.error);
+        onRecordingComplete(0, '系统错误');
       };
 
       setRecognition(recognizer);

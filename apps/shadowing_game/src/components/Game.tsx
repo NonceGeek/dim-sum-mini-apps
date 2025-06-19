@@ -33,7 +33,7 @@ export default function Game({ getResult }: any) {
         onRecordingComplete={handleRecordingComplete}
         onReset={resetScore}
       />
-      {showScore && <ScoreDisplay score={score} feedback={feedback} />}
+      <ScoreDisplay score={score} feedback={feedback} />
     </main>
   );
 }
