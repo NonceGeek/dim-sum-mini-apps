@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "粤语知识分享",
+  title: "粵語知識分享",
 };
 
 export default function RootLayout({

@@ -12,7 +12,8 @@ export default function Main() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const uniqueId = searchParams.get("uuid");
+    const uniqueId =
+      searchParams.get("uuid") || "6e29005d-31ed-42d6-be17-baab39b07fa1";
     if (!uniqueId) {
       setLoading(false);
       return;
@@ -58,7 +59,7 @@ export default function Main() {
   return (
     <div className="container mx-auto p-6">
       <center>
-        <h1 className="text-4xl font-bold mb-8">粤语知识分享</h1>
+        <h1 className="text-4xl font-bold mb-8">粵語知識分享</h1>
       </center>
 
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
