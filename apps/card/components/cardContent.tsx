@@ -103,7 +103,7 @@ export default function CardContent({
                     ? (item.note as DictionaryNote).context.meaning?.map(
                         (m, idx) => (
                           <span key={idx}>
-                            {transformTCOrSp(m, traditional)}
+                            {transformTCOrSp(m || "", traditional)}
                             {idx <
                               (
                                 (item.note as DictionaryNote).context

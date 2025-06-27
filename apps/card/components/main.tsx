@@ -12,14 +12,20 @@ export default function Main() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const uniqueId =
-      searchParams.get("uuid") || "6e29005d-31ed-42d6-be17-baab39b07fa1";
-    if (!uniqueId) {
-      setLoading(false);
-      return;
+    let uniqueId = searchParams.get("uuid");
+
+    async function fetchRandomUUID() {
+      const response = await fetch(
+        "https://dim-sum-prod.deno.dev/random_item?corpus_name=zyzdv2"
+      );
+      const data = await response.json();
+      return data.unique_id;
     }
 
     const fetchData = async () => {
+      if (!uniqueId) {
+        uniqueId = await fetchRandomUUID();
+      }
       try {
         const response = await fetch(
           `https://dim-sum-prod.deno.dev/corpus_item?unique_id=${uniqueId}`
