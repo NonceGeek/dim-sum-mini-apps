@@ -16,7 +16,7 @@ export default function Main() {
 
     async function fetchRandomUUID() {
       const response = await fetch(
-        "https://dim-sum-prod.deno.dev/random_item?corpus_name=zyzdv2"
+        "https://backend.aidimsum.com/random_item?corpus_name=zyzdv2"
       );
       const data = await response.json();
       return data.unique_id;
@@ -28,7 +28,7 @@ export default function Main() {
       }
       try {
         const response = await fetch(
-          `https://dim-sum-prod.deno.dev/corpus_item?unique_id=${uniqueId}`
+          `https://backend.aidimsum.com/corpus_item?unique_id=${uniqueId}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch data");
