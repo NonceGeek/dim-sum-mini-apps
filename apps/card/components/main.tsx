@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import YueCard from "@/components/card";
 import { CorpusItem } from "../types";
+import { Base64 } from "js-base64";
 
 // Create a client component for the main content
 export default function Main() {
@@ -13,9 +14,10 @@ export default function Main() {
 
   useEffect(() => {
     let uniqueId = searchParams.get("uuid");
-    const data = searchParams.get("data") || "";
-    const pinyin = searchParams.get("pinyin") || "";
-    const meaning = searchParams.get("meaning") || "";
+
+    const data = Base64.decode(searchParams.get("data") || "");
+    const pinyin = Base64.decode(searchParams.get("pinyin") || "");
+    const meaning = Base64.decode(searchParams.get("meaning") || "");
     const contributor = searchParams.get("contri") || "";
 
     async function fetchRandomUUID() {

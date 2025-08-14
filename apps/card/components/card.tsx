@@ -92,7 +92,7 @@ const YueCard = ({ item }: { item: CorpusItem }) => {
   const [fontFamily, setFontFamily] = useState(fontFamilyOptions[0].value);
   const [bg, setBg] = useState(bgColorOptions[0].value);
   const [traditional, setTranditional] = useState(
-    searchParams.get("lang") === "jian" ? false : true
+    searchParams.get("lang") === "amlhbg==" ? false : true
   );
 
   return (
