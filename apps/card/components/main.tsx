@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import YueCard from "@/components/card";
 import { CorpusItem } from "../types";
+import { Base64 } from "js-base64";
 
 // Create a client component for the main content
 export default function Main() {
@@ -12,16 +13,43 @@ export default function Main() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const uniqueId = searchParams.get("uuid");
-    if (!uniqueId) {
-      setLoading(false);
-      return;
+    let uniqueId = searchParams.get("uuid");
+
+    const data = Base64.decode(searchParams.get("data") || "");
+    const pinyin = Base64.decode(searchParams.get("pinyin") || "");
+    const meaning = Base64.decode(searchParams.get("meaning") || "");
+    const contributor = searchParams.get("contri") || "";
+
+    async function fetchRandomUUID() {
+      const response = await fetch(
+        "https://backend.aidimsum.com/random_item?corpus_name=zyzdv2"
+      );
+      const data = await response.json();
+      return data.unique_id;
     }
 
     const fetchData = async () => {
+      if (!uniqueId && !data && !pinyin && !meaning && !contributor) {
+        uniqueId = await fetchRandomUUID();
+      } else {
+        setItem({
+          id: Math.random() + "",
+          unique_id: Math.random() + "",
+          data,
+          category: "from url search params",
+          note: {
+            context: {
+              pinyin: [pinyin],
+              meaning: [meaning],
+            },
+            contributor,
+          },
+          tags: [],
+        });
+      }
       try {
         const response = await fetch(
-          `https://dim-sum-prod.deno.dev/corpus_item?unique_id=${uniqueId}`
+          `https://backend.aidimsum.com/corpus_item?unique_id=${uniqueId}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch data");
@@ -58,7 +86,7 @@ export default function Main() {
   return (
     <div className="container mx-auto p-6">
       <center>
-        <h1 className="text-4xl font-bold mb-8">粤语单词卡片生成器</h1>
+        <h1 className="text-4xl font-bold mb-8">粵語知識分享</h1>
       </center>
 
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">

@@ -66,13 +66,15 @@ export default function CardContent({
               `mt-2 ${fontColor} space-y-4 p-4 font-[${fontFamily}]`
             )}
           >
-            {(item.note as DictionaryNote).pinyin && (
+            {(item.note as DictionaryNote).context.pinyin && (
               <p className="leading-relaxed">
                 <b>{transformTCOrSp("粵拼", traditional)}：</b>{" "}
                 <span className={fontColor}>
-                  {Array.isArray((item.note as DictionaryNote).pinyin)
-                    ? (item.note as DictionaryNote)?.pinyin?.join("、 ")
-                    : (item.note as DictionaryNote).pinyin}
+                  {Array.isArray((item.note as DictionaryNote).context.pinyin)
+                    ? (item.note as DictionaryNote)?.context?.pinyin?.join(
+                        "、 "
+                      )
+                    : (item.note as DictionaryNote).context.pinyin}
                 </span>
               </p>
             )}
@@ -91,24 +93,28 @@ export default function CardContent({
           )}
         >
           <div className="p-4 space-y-2">
-            {(item.note as DictionaryNote).meaning && (
+            {(item.note as DictionaryNote).context.meaning && (
               <p className="leading-relaxed">
                 <b className={`${fontColor}`}>
                   {transformTCOrSp("釋義", traditional)}：<br />
                 </b>{" "}
                 <span className={fontColor}>
-                  {Array.isArray((item.note as DictionaryNote).meaning)
-                    ? (item.note as DictionaryNote).meaning?.map((m, idx) => (
-                        <span key={idx}>
-                          {transformTCOrSp(m, traditional)}
-                          {idx <
-                            ((item.note as DictionaryNote).meaning as string[])
-                              .length -
-                              1 && <br />}
-                        </span>
-                      ))
+                  {Array.isArray((item.note as DictionaryNote).context.meaning)
+                    ? (item.note as DictionaryNote).context.meaning?.map(
+                        (m, idx) => (
+                          <span key={idx}>
+                            {transformTCOrSp(m || "", traditional)}
+                            {idx <
+                              (
+                                (item.note as DictionaryNote).context
+                                  .meaning as string[]
+                              ).length -
+                                1 && <br />}
+                          </span>
+                        )
+                      )
                     : transformTCOrSp(
-                        (item.note as DictionaryNote).meaning + "",
+                        (item.note as DictionaryNote).context.meaning + "",
                         traditional
                       )}
                 </span>

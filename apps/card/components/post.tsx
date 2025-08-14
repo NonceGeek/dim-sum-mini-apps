@@ -23,11 +23,14 @@ export default function Post({
   traditional,
 }: CardContentItem) {
   const [scale, setScale] = useState("normal");
+  const [submitInfo, setSubmitInfo] = useState("下载");
   const cardRef = useRef<HTMLDivElement>(null);
   const handleDownload = async () => {
     if (!cardRef.current) return;
 
     try {
+      setSubmitInfo("下载中...");
+
       const dataUrl = await domtoimage.toPng(cardRef.current, {
         quality: 1.0,
         bgcolor: bg,
@@ -40,6 +43,7 @@ export default function Post({
       const link = document.createElement("a");
       link.download = `yue-card-${item.data}.png`;
       link.href = dataUrl;
+      setSubmitInfo("下载");
       link.click();
     } catch (error) {
       console.error("Error generating image:", error);
@@ -97,7 +101,7 @@ export default function Post({
           </div>
           <div className="flex gap-2 ">
             <Button type="submit" onClick={handleDownload}>
-              下载
+              {submitInfo}
             </Button>
           </div>
         </DialogFooter>

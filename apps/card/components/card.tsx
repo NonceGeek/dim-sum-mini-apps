@@ -15,6 +15,7 @@ import { Label } from "./ui/label";
 import { sify, tify } from "chinese-conv/dist";
 import Post from "./post";
 import CardContent from "./cardContent";
+import { useSearchParams } from "next/navigation";
 
 const bgColorOptions = [
   { name: "黑色", value: "bg-stone-950" },
@@ -86,10 +87,13 @@ function transformTCOrSp(str: string, isTrandition: boolean) {
 }
 
 const YueCard = ({ item }: { item: CorpusItem }) => {
+  const searchParams = useSearchParams();
   const [fontColor, setFontColor] = useState(fontColorOptions[0].value);
   const [fontFamily, setFontFamily] = useState(fontFamilyOptions[0].value);
   const [bg, setBg] = useState(bgColorOptions[0].value);
-  const [traditional, setTranditional] = useState(true);
+  const [traditional, setTranditional] = useState(
+    searchParams.get("lang") === "jian" ? false : true
+  );
 
   return (
     <div className="space-y-4">
