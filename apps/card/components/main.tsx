@@ -13,6 +13,10 @@ export default function Main() {
 
   useEffect(() => {
     let uniqueId = searchParams.get("uuid");
+    const data = searchParams.get("data") || "";
+    const pinyin = searchParams.get("pinyin") || "";
+    const meaning = searchParams.get("meaning") || "";
+    const contributor = searchParams.get("contri") || "";
 
     async function fetchRandomUUID() {
       const response = await fetch(
@@ -23,8 +27,23 @@ export default function Main() {
     }
 
     const fetchData = async () => {
-      if (!uniqueId) {
+      if (!uniqueId && !data && !pinyin && !meaning && !contributor) {
         uniqueId = await fetchRandomUUID();
+      } else {
+        setItem({
+          id: Math.random() + "",
+          unique_id: Math.random() + "",
+          data,
+          category: "from url search params",
+          note: {
+            context: {
+              pinyin: [pinyin],
+              meaning: [meaning],
+            },
+            contributor,
+          },
+          tags: [],
+        });
       }
       try {
         const response = await fetch(
