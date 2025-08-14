@@ -1,7 +1,9 @@
 ﻿"use client";
 import React, { useState, useEffect, useRef } from "react";
-import { formatTime } from "@/utils/audioUtils";
 import WaveSurfer from "wavesurfer.js";
+import { Tooltip } from "antd";
+import { useQuestionStore } from "@/stores/questionStore";
+import { IoPulseSharp } from "react-icons/io5";
 
 interface WaveRecorderProps {
   onRecordingComplete: (score: number, feedback: string) => void;
@@ -22,10 +24,11 @@ const WaveRecorder = ({ onRecordingComplete }: WaveRecorderProps) => {
   const [audioBlob, setAudioBlob] = useState(null);
   const [playing, setPlaying] = useState(false);
   const [playTime, setPlayTime] = useState(0);
-  const [isListening, setIsListening] = useState(false);
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(
     null
   );
+  const { currentQuestion } = useQuestionStore();
+  const { yueText } = currentQuestion || {};
 
   const mediaRecorderRef = useRef<MediaRecorder>(null);
   const wavesurferRef = useRef<any>(null);
@@ -33,12 +36,11 @@ const WaveRecorder = ({ onRecordingComplete }: WaveRecorderProps) => {
   const timerRef = useRef<any>(null);
   const animationRef = useRef<any>(null);
   const playProgressRef = useRef<any>(null);
-  const targetText = "我唔食辣野"; // 目标文本
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const SpeechRecognition =
-        window.SpeechRecognition || window.webkitSpeechRecognition;
+        window.SpeechRecognition || window?.webkitSpeechRecognition;
       if (!SpeechRecognition) {
         console.error("Web Speech API not supported");
         return;
@@ -50,15 +52,17 @@ const WaveRecorder = ({ onRecordingComplete }: WaveRecorderProps) => {
 
       recognizer.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
-        const score = calculateSimilarity(transcript, targetText);
-        const feedback = generateFeedback(transcript, targetText);
-        onRecordingComplete(score, feedback);
+        const score = calculateSimilarity(transcript, yueText);
+        const finalScore = Math.min(100, Math.max(Math.round(score * 100), 60));
+        const feedback = generateFeedback(finalScore);
+        onRecordingComplete(finalScore, feedback);
         clearInterval(timerRef.current);
         cancelAnimationFrame(animationRef.current);
       };
 
       recognizer.onerror = (event: any) => {
         console.error("Recognition error:", event.error);
+        onRecordingComplete(0, '系统错误');
       };
 
       setRecognition(recognizer);
@@ -67,7 +71,7 @@ const WaveRecorder = ({ onRecordingComplete }: WaveRecorderProps) => {
     return () => {
       recognition?.abort();
     };
-  }, [targetText]);
+  }, [yueText]);
 
   // 初始化wavesurfer
   useEffect(() => {
@@ -76,11 +80,11 @@ const WaveRecorder = ({ onRecordingComplete }: WaveRecorderProps) => {
         container: waveformRef.current,
         waveColor: "#8ee085",
         progressColor: "#8b5cf6",
-        cursorColor: "transparent",
-        barWidth: 3,
+        cursorColor: "#333",
+        barWidth: 5,
         barRadius: 3,
         barGap: 2,
-        height: 30,
+        height: 16,
         normalize: true,
         interact: false,
       });
@@ -114,13 +118,18 @@ const WaveRecorder = ({ onRecordingComplete }: WaveRecorderProps) => {
     const set1 = new Set(text1.split(""));
     const set2 = new Set(text2.split(""));
     const intersection = new Set([...set1].filter((x) => set2.has(x)));
-    return intersection.size / Math.max(set1.size, set2.size);
+    const score = (intersection.size / Math.max(set1.size, set2.size)) * 2;
+    return score; // 返回百分比
   };
 
-  const generateFeedback = (userText: string, targetText: string): string => {
+  const generateFeedback = (score: number): string => {
     // 生成简单反馈
-    if (userText === targetText) return "发音准确！";
-    return "注意发音差异，请再试一次";
+    if (score > 0 && score < 21) return "注意发音差异，请再试一次";
+    if (score > 20 && score < 41) return "发音不错，但还有提升空间";
+    if (score > 40 && score < 61) return "发音良好，继续保持";
+    if (score > 60 && score < 81) return "发音非常好，接近完美";
+    if (score > 80 && score < 101) return "太棒啦，发音完美无瑕";
+    return "请重新录音";
   };
 
   // 开始录音
@@ -138,7 +147,7 @@ const WaveRecorder = ({ onRecordingComplete }: WaveRecorderProps) => {
       };
 
       mediaRecorderRef.current.onstop = () => {
-        const audioBlob: any = new Blob(audioChunks, { type: "audio/wav" });
+        const audioBlob: any = new Blob(audioChunks, { type: "audio/mp4" });
         const audioUrl = URL.createObjectURL(audioBlob);
         setAudioUrl(audioUrl);
         setAudioBlob(audioBlob);
@@ -207,86 +216,51 @@ const WaveRecorder = ({ onRecordingComplete }: WaveRecorderProps) => {
   };
 
   return (
-    <div className="flex">
-      {/* 录音控制面板 */}
-      <div className="flex flex-col items-center mb-10">
-        <div className="flex items-center space-x-4 mb-8">
-          <button
-            onClick={recording ? stopRecording : startRecording}
-            className={`px-4 py-3 rounded-full font-bold text-lg  duration-300 ${
-              recording
-                ? "bg-red-500 hover:bg-red-600 scale-105 recording-pulse"
-                : "bg-green-500 hover:bg-green-600"
-            }`}
-          >
-            {recording ? (
-              <div className="flex items-center">
-                <div className="w-3 h-3 bg-white rounded-full mr-2 animate-pulse"></div>
-                停
-              </div>
-            ) : (
-              "录"
-            )}
-          </button>
+    <>
+      <div className="flex items-center">
+        {/* 录音控制面板 */}
+        <div className="flex flex-col">
+          <div className="flex space-x-4">
+            <Tooltip
+              title="点击录制"
+              color={"lime"}
+              key={"lime"}
+              placement="bottom"
+              defaultOpen={true}
+            >
+              <button
+                onClick={recording ? stopRecording : startRecording}
+                className={`px-3 py-2 rounded-full font-bold text-lg  duration-300 ${
+                  recording ? "" : ""
+                }`}
+              >
+                {recording ? (
+                  <div className="flex items-center">
+                    <div className="border text-green-200 rounded-full p-1 text-xl">
+                      <IoPulseSharp />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="border text-grey-200 rounded-full p-1 text-xl">
+                    <IoPulseSharp />
+                  </div>
+                )}
+              </button>
+            </Tooltip>
+          </div>
+        </div>
+
+        {/* 波形显示区域 */}
+        <div className="min-w-4/5">
+          <div
+            onClick={togglePlayback}
+            ref={waveformRef}
+            className="border border-indigo-500/30 rounded-xl p-2 min-h-[10px]"
+            style={{ backgroundColor: recording ? "#fff" : "#ceffce" }}
+          ></div>
         </div>
       </div>
-
-      {/* 波形显示区域 */}
-      <div className="mb-10">
-        <div
-          ref={waveformRef}
-          className="bg-white border border-indigo-500/30 rounded-xl p-4 min-h-[10px] min-w-[300px]"
-        ></div>
-
-        {/* 播放控制 */}
-        {audioUrl && (
-          <div className="flex justify-center items-center mt-6 space-x-4">
-            <button
-              onClick={togglePlayback}
-              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-full font-medium flex items-center"
-            >
-              {playing ? (
-                <>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  暂停
-                </>
-              ) : (
-                <>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  播放录音
-                </>
-              )}
-            </button>
-
-            <div className="text-lg font-mono bg-indigo-900/30 px-4 py-2 rounded-lg">
-              {formatTime(playTime)}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+    </>
   );
 };
 
