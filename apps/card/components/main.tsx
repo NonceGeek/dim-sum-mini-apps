@@ -25,7 +25,7 @@ export default function Main() {
 
     async function fetchRandomUUID() {
       const response = await fetch(
-        "https://backend.aidimsum.com/random_item?corpus_name=yyjq"
+        "https://backend.aidimsum.com/random_item?corpus_name=zyzdv2"
       );
       const data = await response.json();
       return data.unique_id;
