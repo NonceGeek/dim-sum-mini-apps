@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import YueCard from "@/components/card";
 import { CorpusItem } from "../types";
-import { Base64 } from "js-base64";
 
 // Create a client component for the main content
 export default function Main() {
@@ -15,21 +14,34 @@ export default function Main() {
   useEffect(() => {
     let uniqueId = searchParams.get("uuid");
 
-    const data = Base64.decode(searchParams.get("data") || "");
-    const pinyin = Base64.decode(searchParams.get("pinyin") || "");
-    const meaning = Base64.decode(searchParams.get("meaning") || "");
+    const data = searchParams.get("data") || "";
+    const pinyin = searchParams.get("pinyin") || null;
+    const meaning = searchParams.get("meaning") || null;
     const contributor = searchParams.get("contri") || "";
+
+    const author = searchParams.get("author") || "";
+    const lyric = searchParams.get("lyric") || "";
+    const pron = searchParams.get("pron") || "";
 
     async function fetchRandomUUID() {
       const response = await fetch(
-        "https://backend.aidimsum.com/random_item?corpus_name=zyzdv2"
+        "https://backend.aidimsum.com/random_item?corpus_name=yyjq"
       );
       const data = await response.json();
       return data.unique_id;
     }
 
     const fetchData = async () => {
-      if (!uniqueId && !data && !pinyin && !meaning && !contributor) {
+      if (
+        !uniqueId &&
+        !data &&
+        !pinyin &&
+        !meaning &&
+        !contributor &&
+        !author &&
+        !lyric &&
+        !pron
+      ) {
         uniqueId = await fetchRandomUUID();
       } else {
         setItem({
@@ -39,8 +51,11 @@ export default function Main() {
           category: "from url search params",
           note: {
             context: {
-              pinyin: [pinyin],
-              meaning: [meaning],
+              author,
+              lyric,
+              pron,
+              ...(pinyin ? { pinyin: [pinyin] } : {}),
+              ...(meaning ? { meaning: [meaning] } : {}),
             },
             contributor,
           },
@@ -65,7 +80,7 @@ export default function Main() {
     };
 
     fetchData();
-  }, [searchParams.get("uuid")]);
+  }, [searchParams]);
 
   if (loading) {
     return (
@@ -82,7 +97,6 @@ export default function Main() {
       </div>
     );
   }
-
   return (
     <div className="container mx-auto p-6">
       <center>

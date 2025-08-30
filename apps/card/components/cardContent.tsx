@@ -78,6 +78,16 @@ export default function CardContent({
                 </span>
               </p>
             )}
+
+            {/* for yyqk corpus */}
+            {(item.note as DictionaryNote).context.author && (
+              <p className="leading-relaxed">
+                <b>{transformTCOrSp("歌手", traditional)}：</b>{" "}
+                <span className={fontColor}>
+                  {(item.note as DictionaryNote).context.author}
+                </span>
+              </p>
+            )}
             <Separator className={`my-4 bg-current`} />
           </div>
         </div>
@@ -121,6 +131,39 @@ export default function CardContent({
               </p>
             )}
 
+            {/* for yyqk corpus */}
+            {(item.note as DictionaryNote).context.description && (
+              <p className="leading-relaxed">
+                <b className={`${fontColor}`}>
+                  {transformTCOrSp("介绍", traditional)}：<br />
+                </b>{" "}
+                <span className={fontColor}>
+                  {transformTCOrSp(
+                    (item.note as DictionaryNote).context.description + "",
+                    traditional
+                  )}
+                </span>
+              </p>
+            )}
+            {/* for yyqk lyric */}
+            {(item.note as DictionaryNote).context.lyric &&
+              typeof (item.note as DictionaryNote).context.lyric ===
+                "string" && (
+                <p className="leading-relaxed">
+                  <b className={`${fontColor}`}>
+                    {transformTCOrSp("歌词", traditional)}：<br />
+                  </b>{" "}
+                  <span className={fontColor}>
+                    {transformTCOrSp(
+                      (item.note as DictionaryNote).context.lyric + "",
+                      traditional
+                    )}
+                    <br />
+                    {(item.note as DictionaryNote).context.pron}
+                  </span>
+                </p>
+              )}
+
             {(item.note as DictionaryNote).contributor && (
               <p className="leading-relaxed mt-16 italic">
                 <b className={`${fontColor}`}>
@@ -132,8 +175,6 @@ export default function CardContent({
               </p>
             )}
           </div>
-
-          {/* TODO: 智能发音 */}
         </div>
       </div>
     </div>

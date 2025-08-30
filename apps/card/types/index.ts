@@ -9,6 +9,10 @@ interface DictionaryContext {
   };
   pinyin?: string[];
   meaning?: string[];
+  author?: string;
+  lyric?: string;
+  pron?: string;
+  description?: string;
 }
 export interface DictionaryNote {
   context: DictionaryContext;
