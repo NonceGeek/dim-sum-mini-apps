@@ -78,6 +78,14 @@ export default function CardContent({
                 </span>
               </p>
             )}
+            {(item.note as DictionaryNote).context.song_name_pin && (
+              <p className="leading-relaxed">
+                <b>{transformTCOrSp("粵拼", traditional)}：</b>{" "}
+                <span className={fontColor}>
+                  {(item.note as DictionaryNote).context.song_name_pin}
+                </span>
+              </p>
+            )}
 
             {/* for yyqk corpus */}
             {(item.note as DictionaryNote).context.author && (
@@ -132,14 +140,14 @@ export default function CardContent({
             )}
 
             {/* for yyqk corpus */}
-            {(item.note as DictionaryNote).context.description && (
+            {(item.note as DictionaryNote).context.introduction && (
               <p className="leading-relaxed">
                 <b className={`${fontColor}`}>
                   {transformTCOrSp("介绍", traditional)}：<br />
                 </b>{" "}
                 <span className={fontColor}>
                   {transformTCOrSp(
-                    (item.note as DictionaryNote).context.description + "",
+                    (item.note as DictionaryNote).context.introduction + "",
                     traditional
                   )}
                 </span>

@@ -12,7 +12,8 @@ interface DictionaryContext {
   author?: string;
   lyric?: string;
   pron?: string;
-  description?: string;
+  introduction?: string;
+  song_name_pin?: string;
 }
 export interface DictionaryNote {
   context: DictionaryContext;
