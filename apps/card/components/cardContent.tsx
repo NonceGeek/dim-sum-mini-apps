@@ -216,12 +216,12 @@ export default function CardContent({
               </p>
             )}
 
-          {/* {(item.note as DictionaryNote).contributor && (
+          {(item.note as DictionaryNote).contributor && (
             <p className="leading-relaxed">
               <b>{transformTCOrSp("貢獻者", traditional)}：</b>{" "}
               <span>{(item.note as DictionaryNote).contributor}</span>
             </p>
-          )} */}
+          )}
 
           {item.unique_id && (
             <p className="leading-relaxed text-[var(--ds-muted)]">
