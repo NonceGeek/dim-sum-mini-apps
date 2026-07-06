@@ -9,6 +9,27 @@ function formatUniqueId(uniqueId: string) {
   return `${uniqueId.slice(0, 7)}...${uniqueId.slice(-4)}`;
 }
 
+const structuredBlockLabels: Record<string, string> = {
+  definition: "釋義",
+  introduction: "介绍",
+  emotion: "情感",
+  intensity: "情感强度",
+  other: "其他",
+};
+
+function addStructuredBlock(
+  blocks: Record<string, string[]>,
+  type: string | undefined,
+  value: string | number | undefined,
+) {
+  if (!type || value === undefined || value === "") {
+    return blocks;
+  }
+
+  blocks[type] = [...(blocks[type] || []), String(value)];
+  return blocks;
+}
+
 export default function CardContent({
   cardRef,
   fontFamily,
@@ -20,33 +41,64 @@ export default function CardContent({
   category,
 }: CardContentItem) {
   const dictionaryContext = (item.note as DictionaryNote).context;
-  const structuredBlocks =
-    item.structured_note?.data?.flatMap((data) => data.blocks || []) || [];
-  const structuredJyutpings = item.structured_note?.data
-    ?.map((data) => data.jyutping || data.jytping)
-    .filter((jyutping): jyutping is string => Boolean(jyutping));
-  const structuredDefinitions = structuredBlocks
-    .filter((block) => block.type === "definition" && block.content)
-    .map((block) => block.content as string);
+  const structuredNote = item.structured_note || item.structuredNote;
+  const structuredPronunciations =
+    structuredNote?.data
+      ?.map((data) => {
+        const blocksByType =
+          data.blocks?.reduce<Record<string, string[]>>((blocks, block) => {
+            if (block.type === "emotion") {
+              addStructuredBlock(
+                blocks,
+                "emotion",
+                block.category ?? block.content ?? block.value ?? block.emotion,
+              );
+              addStructuredBlock(blocks, "intensity", block.intensity);
+              return blocks;
+            }
+
+            return addStructuredBlock(
+              blocks,
+              block.type,
+              block.content ??
+                block.value ??
+                block.emotion ??
+                block.emotionIntensity ??
+                block.emotion_intensity ??
+                block.intensity,
+            );
+          }, {}) || {};
+        addStructuredBlock(blocksByType, "emotion", data.emotion);
+        addStructuredBlock(
+          blocksByType,
+          "emotionIntensity",
+          data.emotionIntensity ?? data.emotion_intensity ?? data.intensity,
+        );
+
+        return {
+          jyutping: data.jyutping || data.jytping || "",
+          blocksByType,
+        };
+      })
+      .filter(
+        (data) => data.jyutping || Object.keys(data.blocksByType).length > 0,
+      ) || [];
+  const hasStructuredContent = structuredPronunciations.length > 0;
   const contextPinyin = dictionaryContext.pinyin;
   const contextMeanings = dictionaryContext.meaning;
-  const jyutpings =
-    structuredJyutpings?.length && structuredJyutpings.length > 0
-      ? structuredJyutpings
-      : Array.isArray(contextPinyin)
-        ? contextPinyin
-        : contextPinyin
-          ? [contextPinyin]
-          : [];
-  const definitions =
-    structuredDefinitions.length > 0
-      ? structuredDefinitions
-      : Array.isArray(contextMeanings)
-        ? contextMeanings
-        : contextMeanings
-          ? [contextMeanings]
-          : [];
-
+  const jyutpings = Array.isArray(contextPinyin)
+    ? contextPinyin
+    : contextPinyin
+      ? [contextPinyin]
+      : [];
+  const definitions = Array.isArray(contextMeanings)
+    ? contextMeanings
+    : contextMeanings
+      ? [contextMeanings]
+      : [];
+  const fallbackJyutpings = dictionaryContext.song_name_pin
+    ? [dictionaryContext.song_name_pin]
+    : jyutpings;
   return (
     <div
       ref={cardRef}
@@ -78,59 +130,84 @@ export default function CardContent({
             `p-4 pt-0 font-[${fontFamily}] [&>*:not(:last-child)]:mb-3`,
           )}
         >
-          {/* 非歌曲粤拼 */}
-          {jyutpings.length > 0 && (
+          {/* 结构化粤拼和释义，多音字按读音分组 */}
+          {hasStructuredContent && (
+            <div className="space-y-2 leading-relaxed">
+              {structuredPronunciations.map((pronunciation, index) => (
+                <div key={`${pronunciation.jyutping}-${index}`}>
+                  {pronunciation.jyutping && (
+                    <p>
+                      <b>{transformTCOrSp("粵拼", traditional)}：</b>{" "}
+                      <span>
+                        {transformTCOrSp(pronunciation.jyutping, traditional)}
+                      </span>
+                    </p>
+                  )}
+                  {Object.entries(structuredBlockLabels).map(
+                    ([type, label]) => {
+                      const contents = pronunciation.blocksByType[type] || [];
+
+                      if (contents.length === 0) {
+                        return null;
+                      }
+
+                      return (
+                        <p key={type}>
+                          <b>{transformTCOrSp(label, traditional)}：</b>{" "}
+                          <span>
+                            {contents
+                              .map((content) =>
+                                transformTCOrSp(content, traditional),
+                              )
+                              .join("\n")}
+                          </span>
+                        </p>
+                      );
+                    },
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* 粤拼 */}
+          {!hasStructuredContent && fallbackJyutpings.length > 0 && (
             <p className="leading-relaxed">
               <b>{transformTCOrSp("粵拼", traditional)}：</b>{" "}
               <span>
-                {jyutpings
+                {fallbackJyutpings
                   .map((jyutping) => transformTCOrSp(jyutping, traditional))
                   .join("、 ")}
               </span>
             </p>
           )}
 
-          {/* 歌曲粤拼 */}
-          {dictionaryContext.song_name_pin && (
-            <p className="leading-relaxed">
-              <b>{transformTCOrSp("粵拼", traditional)}：</b>{" "}
-              <span>{dictionaryContext.song_name_pin}</span>
-            </p>
-          )}
-
           {/* 释义 */}
-          {definitions.length > 0 && (
+          {!hasStructuredContent && definitions.length > 0 && (
             <p className="leading-relaxed">
-              <b>
-                {transformTCOrSp("釋義", traditional)}：<br />
-              </b>{" "}
+              <b>{transformTCOrSp("釋義", traditional)}：</b>{" "}
               <span>
-                {definitions.map((definition, idx) => (
-                  <span key={`${definition}-${idx}`}>
-                    {transformTCOrSp(definition, traditional)}
-                    {idx < definitions.length - 1 && <br />}
-                  </span>
-                ))}
+                {definitions
+                  .map((definition) =>
+                    transformTCOrSp(definition, traditional),
+                  )
+                  .join("\n")}
               </span>
             </p>
           )}
 
           {/* 歌曲歌手 */}
-          {dictionaryContext.author && (
+          {!hasStructuredContent && dictionaryContext.author && (
             <p className="leading-relaxed">
               <b>{transformTCOrSp("歌手", traditional)}：</b>{" "}
               <span>{dictionaryContext.author}</span>
             </p>
           )}
 
-          <Separator className="!my-4 bg-[var(--ds-primary)]" />
-
-            {/* 歌曲介绍 */}
-          {dictionaryContext.introduction && (
+          {/* 歌曲介绍 */}
+          {!hasStructuredContent && dictionaryContext.introduction && (
             <p className="leading-relaxed">
-              <b>
-                {transformTCOrSp("介绍", traditional)}：<br />
-              </b>{" "}
+              <b>{transformTCOrSp("介绍", traditional)}：</b>{" "}
               <span>
                 {transformTCOrSp(
                   dictionaryContext.introduction + "",
@@ -139,6 +216,8 @@ export default function CardContent({
               </span>
             </p>
           )}
+
+          <Separator className="!my-4 bg-[var(--ds-primary)]" />
 
           {/* 来源语料集 */}
           {category?.nickname && (
@@ -200,23 +279,6 @@ export default function CardContent({
               </div>
             </div>
           )}
-
-        
-
-          {/* 歌曲歌词 */}
-          {dictionaryContext.lyric &&
-            typeof dictionaryContext.lyric === "string" && (
-              <p className="leading-relaxed">
-                <b>
-                  {transformTCOrSp("歌词", traditional)}：<br />
-                </b>{" "}
-                <span>
-                  {transformTCOrSp(dictionaryContext.lyric + "", traditional)}
-                  <br />
-                  {dictionaryContext.pron}
-                </span>
-              </p>
-            )}
 
           {(item.note as DictionaryNote).contributor && (
             <p className="leading-relaxed">

@@ -1,8 +1,16 @@
 import { RefObject } from "react";
 
+interface LyricLine {
+  sec?: number;
+  data?: string;
+  pron?: string;
+}
+
 interface DictionaryContext {
   page?: number;
   number?: string;
+  album?: string;
+  audio?: string;
   others?: {
     異體?: any[];
     校訂註?: string | null;
@@ -10,7 +18,10 @@ interface DictionaryContext {
   pinyin?: string[];
   meaning?: string[];
   author?: string;
-  lyric?: string;
+  composer?: string;
+  lyricist?: string;
+  song_name?: string;
+  lyric?: string | LyricLine[];
   pron?: string;
   introduction?: string;
   song_name_pin?: string;
@@ -24,7 +35,13 @@ export type Note = DictionaryNote;
 
 interface StructuredNoteBlock {
   type?: string;
+  category?: string;
   content?: string;
+  value?: string | number;
+  emotion?: string;
+  intensity?: string | number;
+  emotionIntensity?: string | number;
+  emotion_intensity?: string | number;
   jyutping?: string;
   jytping?: string;
 }
@@ -33,6 +50,11 @@ interface StructuredNoteDataItem {
   blocks?: StructuredNoteBlock[];
   jyutping?: string;
   jytping?: string;
+  category?: string;
+  emotion?: string;
+  intensity?: string | number;
+  emotionIntensity?: string | number;
+  emotion_intensity?: string | number;
 }
 
 export interface StructuredNote {
@@ -46,6 +68,7 @@ export interface CorpusItem {
   category: string;
   note: Note;
   structured_note?: StructuredNote;
+  structuredNote?: StructuredNote;
   tags: string[];
   related_tags?: string[];
   recommended_tags?: string[];

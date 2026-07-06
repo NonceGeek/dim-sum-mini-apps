@@ -3,7 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import YueCard from "@/components/card";
-import { CardMode, CorpusCategory, CorpusItem } from "../types";
+import {
+  CardMode,
+  CorpusCategory,
+  CorpusItem,
+  DictionaryNote,
+  StructuredNote,
+} from "../types";
 
 const backendBaseUrl = (
   process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "https://backend.aidimsum.com"
@@ -30,6 +36,10 @@ type EntryDetail = {
   entryName: string;
   jyutping: string | null;
   meaning: string | null;
+  raw?: {
+    note?: DictionaryNote | null;
+    structuredNote?: StructuredNote | null;
+  } | null;
   source: {
     categoryName: string;
     categoryDisplayName: string | null;
@@ -50,11 +60,6 @@ type EntryDetailResponse = {
   entry: EntryDetail;
 };
 
-type CardData = {
-  item: CorpusItem;
-  category: CorpusCategory;
-};
-
 function mapEntryToCardData(entry: EntryDetail): {
   item: CorpusItem;
   category: CorpusCategory;
@@ -63,6 +68,15 @@ function mapEntryToCardData(entry: EntryDetail): {
     entry.category.primary?.name,
     entry.category.secondary?.name,
   ].filter((tag): tag is string => Boolean(tag));
+  const note = {
+    ...(entry.raw?.note ?? {
+      context: {
+        ...(entry.jyutping ? { pinyin: [entry.jyutping] } : {}),
+        ...(entry.meaning ? { meaning: [entry.meaning] } : {}),
+      },
+    }),
+    contributor: entry.source.contributorIds.join(", "),
+  };
 
   return {
     item: {
@@ -70,13 +84,8 @@ function mapEntryToCardData(entry: EntryDetail): {
       unique_id: entry.entryId,
       data: entry.entryName,
       category: entry.source.categoryName,
-      note: {
-        context: {
-          ...(entry.jyutping ? { pinyin: [entry.jyutping] } : {}),
-          ...(entry.meaning ? { meaning: [entry.meaning] } : {}),
-        },
-        contributor: entry.source.contributorIds.join(", "),
-      },
+      note,
+      structured_note: entry.raw?.structuredNote ?? undefined,
       tags: [],
       related_tags: entry.tags.related.map((tag) => tag.name),
       recommended_tags: entry.tags.recommended.map((tag) => tag.name),
@@ -145,40 +154,6 @@ export default function Main() {
       return mapEntryToCardData(data.entry);
     }
 
-    async function fetchCorpusItem(uniqueId: string) {
-      const response = await fetch(
-        `${backendBaseUrl}/v2/corpus_item?unique_id=${encodeURIComponent(
-          uniqueId,
-        )}`,
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch corpus item");
-      }
-
-      return (await response.json()) as CorpusItem;
-    }
-
-    async function fetchQueryUuidCardData(uniqueId: string): Promise<CardData> {
-      const [entryCardData, corpusItem] = await Promise.all([
-        fetchEntryCardData(uniqueId),
-        fetchCorpusItem(uniqueId),
-      ]);
-
-      if (corpusItem.category === "yyqk") {
-        return {
-          item: {
-            ...corpusItem,
-            related_tags: entryCardData.item.related_tags,
-            recommended_tags: entryCardData.item.recommended_tags,
-          },
-          category: entryCardData.category,
-        };
-      }
-
-      return entryCardData;
-    }
-
     function buildUrlItem() {
       return {
         id: Math.random() + "",
@@ -204,8 +179,16 @@ export default function Main() {
       setItem(null);
       setCategory(null);
 
-      const hasUrlItemParams =
-        data || pinyin || meaning || contributor || author || lyric || pron;
+      const hasUrlItemParams = Boolean(
+        uniqueId ||
+          data ||
+          pinyin ||
+          meaning ||
+          contributor ||
+          author ||
+          lyric ||
+          pron,
+      );
 
       try {
         if (hasUrlItemParams) {
@@ -213,7 +196,7 @@ export default function Main() {
         }
 
         if (uniqueId) {
-          const cardData = await fetchQueryUuidCardData(uniqueId);
+          const cardData = await fetchEntryCardData(uniqueId);
           setItem(cardData.item);
           setCategory(cardData.category);
           return;
