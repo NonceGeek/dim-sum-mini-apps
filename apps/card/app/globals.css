@@ -36,8 +36,9 @@
   --ds-primary: #007fff;
   --ds-muted: oklch(0.46 0.01 256);
   --ds-border: oklch(0.88 0.01 256);
-  --ds-tag-background: oklch(0.96 0.035 256);
-  --ds-tag-foreground: oklch(0.22 0.005 256);
+  --ds-tag-background: #e8f3ff;
+  --ds-tag-foreground: #007fff;
+  --ds-tag-border: #acd3ff;
   --ds-card-shadow: 0 10px 30px rgba(15, 23, 42, 0.14);
 
   --radius: 0.625rem;
@@ -67,8 +68,9 @@
   --ds-primary: #5aa8ff;
   --ds-muted: oklch(0.72 0.01 256);
   --ds-border: oklch(0.32 0.02 256);
-  --ds-tag-background: oklch(0.22 0.035 256);
-  --ds-tag-foreground: oklch(0.94 0.005 256);
+  --ds-tag-background: oklch(0.22 0.055 256);
+  --ds-tag-foreground: #5aa8ff;
+  --ds-tag-border: #5aa8ff;
   --ds-card-shadow: 0 0 0 1px rgba(90, 168, 255, 0.28), 0 18px 44px rgba(90, 168, 255, 0.24);
 
   --background: var(--ds-background);

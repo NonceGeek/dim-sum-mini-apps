@@ -50,6 +50,11 @@ type EntryDetailResponse = {
   entry: EntryDetail;
 };
 
+type CardData = {
+  item: CorpusItem;
+  category: CorpusCategory;
+};
+
 function mapEntryToCardData(entry: EntryDetail): {
   item: CorpusItem;
   category: CorpusCategory;
@@ -114,7 +119,7 @@ export default function Main() {
     const lyric = searchParams.get("lyric") || "";
     const pron = searchParams.get("pron") || "";
 
-    async function fetchRandomItem() {
+    async function fetchRandomUUID() {
       const response = await fetch(
         `${backendBaseUrl}/random_item?corpus_name=zyzdv2`,
       );
@@ -124,36 +129,74 @@ export default function Main() {
       }
 
       const data = await response.json();
-      return data;
+      return data.unique_id;
     }
 
-    async function fetchCorpusCategory(category: string) {
+    async function fetchEntryCardData(uniqueId: string) {
       const response = await fetch(
-        `${backendBaseUrl}/v2/corpus_category?name=${encodeURIComponent(
-          category,
+        `${backendApiUrl}/api/entries/${encodeURIComponent(uniqueId)}`,
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+
+      const data = (await response.json()) as EntryDetailResponse;
+      return mapEntryToCardData(data.entry);
+    }
+
+    async function fetchCorpusItem(uniqueId: string) {
+      const response = await fetch(
+        `${backendBaseUrl}/v2/corpus_item?unique_id=${encodeURIComponent(
+          uniqueId,
         )}`,
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch category");
+        throw new Error("Failed to fetch corpus item");
       }
 
-      return response.json();
+      return (await response.json()) as CorpusItem;
     }
 
-    async function setItemWithCategory(item: CorpusItem) {
-      setItem(item);
+    async function fetchQueryUuidCardData(uniqueId: string): Promise<CardData> {
+      const [entryCardData, corpusItem] = await Promise.all([
+        fetchEntryCardData(uniqueId),
+        fetchCorpusItem(uniqueId),
+      ]);
 
-      if (!item.category) {
-        return;
+      if (corpusItem.category === "yyqk") {
+        return {
+          item: {
+            ...corpusItem,
+            related_tags: entryCardData.item.related_tags,
+            recommended_tags: entryCardData.item.recommended_tags,
+          },
+          category: entryCardData.category,
+        };
       }
 
-      try {
-        const category = await fetchCorpusCategory(item.category);
-        setCategory(category);
-      } catch (error) {
-        console.error("Error fetching category:", error);
-      }
+      return entryCardData;
+    }
+
+    function buildUrlItem() {
+      return {
+        id: Math.random() + "",
+        unique_id: uniqueId || "",
+        data,
+        category: "from url search params",
+        note: {
+          context: {
+            author,
+            lyric,
+            pron,
+            ...(pinyin ? { pinyin: [pinyin] } : {}),
+            ...(meaning ? { meaning: [meaning] } : {}),
+          },
+          contributor,
+        },
+        tags: [],
+      };
     }
 
     const fetchData = async () => {
@@ -165,45 +208,24 @@ export default function Main() {
         data || pinyin || meaning || contributor || author || lyric || pron;
 
       try {
+        if (hasUrlItemParams) {
+          setItem(buildUrlItem());
+        }
+
         if (uniqueId) {
-          const response = await fetch(
-            `${backendApiUrl}/api/entries/${encodeURIComponent(uniqueId)}`,
-          );
-
-          if (!response.ok) {
-            throw new Error("Failed to fetch data");
-          }
-
-          const data = (await response.json()) as EntryDetailResponse;
-          const cardData = mapEntryToCardData(data.entry);
+          const cardData = await fetchQueryUuidCardData(uniqueId);
           setItem(cardData.item);
           setCategory(cardData.category);
           return;
         }
 
         if (!hasUrlItemParams) {
-          const data = await fetchRandomItem();
-          await setItemWithCategory(data);
+          const randomUniqueId = await fetchRandomUUID();
+          const cardData = await fetchEntryCardData(randomUniqueId);
+          setItem(cardData.item);
+          setCategory(cardData.category);
           return;
         }
-
-        await setItemWithCategory({
-          id: Math.random() + "",
-          unique_id: Math.random() + "",
-          data,
-          category: "from url search params",
-          note: {
-            context: {
-              author,
-              lyric,
-              pron,
-              ...(pinyin ? { pinyin: [pinyin] } : {}),
-              ...(meaning ? { meaning: [meaning] } : {}),
-            },
-            contributor,
-          },
-          tags: [],
-        });
       } catch (error) {
         console.error("Error fetching data:", error);
         // toast.error("Failed to fetch data");

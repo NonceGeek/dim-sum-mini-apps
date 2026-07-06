@@ -125,6 +125,21 @@ export default function CardContent({
 
           <Separator className="!my-4 bg-[var(--ds-primary)]" />
 
+            {/* 歌曲介绍 */}
+          {dictionaryContext.introduction && (
+            <p className="leading-relaxed">
+              <b>
+                {transformTCOrSp("介绍", traditional)}：<br />
+              </b>{" "}
+              <span>
+                {transformTCOrSp(
+                  dictionaryContext.introduction + "",
+                  traditional,
+                )}
+              </span>
+            </p>
+          )}
+
           {/* 来源语料集 */}
           {category?.nickname && (
             <p className="leading-relaxed">
@@ -158,7 +173,7 @@ export default function CardContent({
                 ).map((tag) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center rounded-md border border-[var(--ds-primary)] bg-[var(--ds-tag-background)] px-2 py-0.5 text-[0.95em] font-semibold leading-tight text-[var(--ds-tag-foreground)]"
+                    className="inline-flex items-center rounded-md border border-[var(--ds-tag-border)] bg-[var(--ds-tag-background)] px-2 py-0.5 text-[0.95em] font-semibold leading-tight text-[var(--ds-tag-foreground)]"
                   >
                     {transformTCOrSp(tag, traditional)}
                   </span>
@@ -186,20 +201,7 @@ export default function CardContent({
             </div>
           )}
 
-          {/* 歌曲介绍 */}
-          {dictionaryContext.introduction && (
-            <p className="leading-relaxed">
-              <b>
-                {transformTCOrSp("介绍", traditional)}：<br />
-              </b>{" "}
-              <span>
-                {transformTCOrSp(
-                  dictionaryContext.introduction + "",
-                  traditional,
-                )}
-              </span>
-            </p>
-          )}
+        
 
           {/* 歌曲歌词 */}
           {dictionaryContext.lyric &&
